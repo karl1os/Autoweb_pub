@@ -64,8 +64,8 @@
 	wget -P /var/www/html/ https://es.wordpress.org/wordpress-6.2-es_ES.tar.gz
 	tar -xzf /var/www/html/wordpress-6.2-es_ES.tar.gz -C /var/www/html/
 	mv /var/www/html/wordpress/* /var/www/html/
-	rm -rf /var/www/html/wordpress/ /var/www/html/index.htm
-l	cp /var/www/html/wp-config-sample.php /var/www/html/wp-config-sample.old
+	rm -rf /var/www/html/wordpress/ /var/www/html/index.html
+	cp /var/www/html/wp-config-sample.php /var/www/html/wp-config-sample.old
 	mv /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
 	sed -i "s/define( 'DB_NAME', 'database_name_here' );/define( 'DB_NAME', 'wordpress' );/" /var/www/html/wp-config.php
 	sed -i "s/define( 'DB_USER', 'username_here' );/define( 'DB_USER', 'wordpress' );/" /var/www/html/wp-config.php

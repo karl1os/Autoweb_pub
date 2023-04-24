@@ -1,15 +1,28 @@
 #!/bin/bash
 
-# Crear usuario sudo USER_NAME y su configuracion.
-	# useradd USER_NAME
-	# echo "Passw0rd" | passwd --stdin USER_NAME
-	# usermod -aG wheel USER_NAME
-	# mkhomedir_helper USER_NAME
-	# mkdir /home/USER_NAME/.ssh
-	# touch /home/USER_NAME/.ssh/authorized_keys
-	# echo -e "PUBLIC_KEY.PUB" > /home/USER_NAME/.ssh/authorized_keys
-	# chown USER_NAME:USER_NAME /home/USER_NAME/.ssh
-	# chown USER_NAME:USER_NAME/home/USER_NAME/.ssh/*
+# =====================================
+# title             : start_script.sh
+# description       : Auto deploy LAMP + Wordpress
+# author            : Carlos Hernandez Navarro
+# date              : 20/04/2023
+# version			: 0.8 (on development)
+# =====================================
+
+# Variables
+ USER_NAME="CHN"
+ pass_user="123456"
+ db_root_pass="Passw0rd"
+ db_wp_pass="PassW0rd"
+# Crear usuario sudo $USER_NAME y su configuracion.
+	# useradd $USER_NAME
+	# echo "$pass_user" | passwd --stdin $USER_NAME
+	# usermod -aG wheel $USER_NAME
+	# mkhomedir_helper $USER_NAME
+	# mkdir /home/$USER_NAME/.ssh
+	# touch /home/$USER_NAME/.ssh/authorized_keys
+	# echo -e "PUBLIC_KEY.PUB" > /home/$USER_NAME/.ssh/authorized_keys
+	# chown $USER_NAME:$USER_NAME /home/$USER_NAME/.ssh
+	# chown $USER_NAME:$USER_NAME/home/$USER_NAME/.ssh/*
 
 # Actualizar paquetes
 	add-apt-repository -y ppa:ondrej/php
@@ -27,20 +40,20 @@
 
 # Configurar base de datos de Wordpress
 		# secure configuration
-		mysqladmin -u root password 'Passw0rd'
+		mysqladmin -u root password '$db_root_pass'
 		## Eliminar usuarios anónimos
-		mysql -u root -p='Passw0rd' -e "DELETE FROM mysql.user WHERE User='';"
+		mysql -u root -p='$db_root_pass' -e "DELETE FROM mysql.user WHERE User='';"
 		## Eliminar acceso remoto para root
-		mysql -u root -p='Passw0rd' -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
+		mysql -u root -p='$db_root_pass' -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
 		## Eliminar base de datos de prueba y cualquier acceso a ella
-		mysql -u root -p='Passw0rd' -e "DROP DATABASE IF EXISTS test;"
-		mysql -u root -p='Passw0rd' -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';"
+		mysql -u root -p='$db_root_pass' -e "DROP DATABASE IF EXISTS test;"
+		mysql -u root -p='$db_root_pass' -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';"
 		## Aplicar cambios
-		mysql -u root -p='Passw0rd' -e "FLUSH PRIVILEGES;"
-	mysql -u root -p='Passw0rd' -e "CREATE DATABASE wordpress;"
-	mysql -u root -p='Passw0rd' -e "CREATE USER 'wordpress'@'localhost' IDENTIFIED BY 'Passw0rd';"
-	mysql -u root -p='Passw0rd' -e "GRANT ALL PRIVILEGES ON wordpress.* TO 'wordpress'@'localhost';"
-	mysql -u root -p='Passw0rd' -e "FLUSH PRIVILEGES;"
+		mysql -u root -p='$db_root_pass' -e "FLUSH PRIVILEGES;"
+	mysql -u root -p='$db_root_pass' -e "CREATE DATABASE wordpress;"
+	mysql -u root -p='$db_root_pass' -e "CREATE USER 'wordpress'@'localhost' IDENTIFIED BY '$db_wp_pass';"
+	mysql -u root -p='$db_root_pass' -e "GRANT ALL PRIVILEGES ON wordpress.* TO 'wordpress'@'localhost';"
+	mysql -u root -p='$db_root_pass' -e "FLUSH PRIVILEGES;"
 
 # configurar UFW
 	ufw allow http
@@ -56,7 +69,7 @@ l	cp /var/www/html/wp-config-sample.php /var/www/html/wp-config-sample.old
 	mv /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
 	sed -i "s/define( 'DB_NAME', 'database_name_here' );/define( 'DB_NAME', 'wordpress' );/" /var/www/html/wp-config.php
 	sed -i "s/define( 'DB_USER', 'username_here' );/define( 'DB_USER', 'wordpress' );/" /var/www/html/wp-config.php
-	sed -i "s/define( 'DB_PASSWORD', 'password_here' );/define( 'DB_PASSWORD', 'Passw0rd' );/" /var/www/html/wp-config.php
+	sed -i "s/define( 'DB_PASSWORD', 'password_here' );/define( 'DB_PASSWORD', '$db_wp_pass' );/" /var/www/html/wp-config.php
 
 # configuracion permisos para apache
 	chown -R www-data /var/www/html/

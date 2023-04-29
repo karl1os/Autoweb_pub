@@ -5,7 +5,7 @@
 # description       : Auto deploy LAMP + Wordpress
 # author            : Carlos Hernandez Navarro
 # date              : 20/04/2023
-# version			: 0.8.98a (on alfa testing)
+# version	    : 0.8.98a (on alfa testing)
 # =====================================
 # 
 # Variables

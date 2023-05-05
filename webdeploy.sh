@@ -5,24 +5,31 @@
 # description       : Auto deploy LAMP + Wordpress
 # author            : Carlos Hernandez Navarro
 # date              : 20/04/2023
-# version	    : 0.8 (on development)
+# version	    : 0.8.98a (on alfa testing)
 # =====================================
-
+# 
 # Variables
- USER_NAME="CHN"
- pass_user="123456"
- db_root_pass="Passw0rd"
- db_wp_pass="PassW0rd"
-# Crear usuario sudo $USER_NAME y su configuracion.
-	# useradd $USER_NAME
-	# echo "$pass_user" | passwd --stdin $USER_NAME
-	# usermod -aG wheel $USER_NAME
-	# mkhomedir_helper $USER_NAME
-	# mkdir /home/$USER_NAME/.ssh
-	# touch /home/$USER_NAME/.ssh/authorized_keys
-	# echo -e "PUBLIC_KEY.PUB" > /home/$USER_NAME/.ssh/authorized_keys
-	# chown $USER_NAME:$USER_NAME /home/$USER_NAME/.ssh
-	# chown $USER_NAME:$USER_NAME/home/$USER_NAME/.ssh/*
+	## Admin user:
+ 		USER_NAME="username_here"
+ 		pass_user="password_here"
+ 		pub_key="PUBLIC_KEY.PUB"
+ 	## wordpress database:
+ 		db_wp_name="database_name_here"
+ 		db_wp_user="username_here"
+ 		db_wp_pass="password_here"
+ 	## root database password:
+ 		db_root_pass="password_here"
+
+# Crear usuario sudo para administracion y su configuracion.
+#	useradd $USER_NAME
+#	echo "$pass_user" | passwd --stdin $USER_NAME
+#	usermod -aG wheel $USER_NAME
+#	mkhomedir_helper $USER_NAME
+#	mkdir /home/$USER_NAME/.ssh
+#	touch /home/$USER_NAME/.ssh/authorized_keys
+#	echo -e "$pub_key" > /home/$USER_NAME/.ssh/authorized_keys
+#	chown $USER_NAME:$USER_NAME /home/$USER_NAME/.ssh
+#	chown $USER_NAME:$USER_NAME/home/$USER_NAME/.ssh/*
 
 # Actualizar paquetes
 	add-apt-repository -y ppa:ondrej/php
@@ -50,9 +57,9 @@
 		mysql -u root -p='$db_root_pass' -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';"
 		## Aplicar cambios
 		mysql -u root -p='$db_root_pass' -e "FLUSH PRIVILEGES;"
-	mysql -u root -p='$db_root_pass' -e "CREATE DATABASE wordpress;"
-	mysql -u root -p='$db_root_pass' -e "CREATE USER 'wordpress'@'localhost' IDENTIFIED BY '$db_wp_pass';"
-	mysql -u root -p='$db_root_pass' -e "GRANT ALL PRIVILEGES ON wordpress.* TO 'wordpress'@'localhost';"
+	mysql -u root -p='$db_root_pass' -e "CREATE DATABASE $db_wp_name;"
+	mysql -u root -p='$db_root_pass' -e "CREATE USER '$db_wp_user'@'localhost' IDENTIFIED BY '$db_wp_pass';"
+	mysql -u root -p='$db_root_pass' -e "GRANT ALL PRIVILEGES ON $db_wp_name.* TO '$db_wp_user'@'localhost';"
 	mysql -u root -p='$db_root_pass' -e "FLUSH PRIVILEGES;"
 
 # configurar UFW
@@ -67,14 +74,11 @@
 	rm -rf /var/www/html/wordpress/ /var/www/html/index.html
 	cp /var/www/html/wp-config-sample.php /var/www/html/wp-config-sample.old
 	mv /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
-	sed -i "s/define( 'DB_NAME', 'database_name_here' );/define( 'DB_NAME', 'wordpress' );/" /var/www/html/wp-config.php
-	sed -i "s/define( 'DB_USER', 'username_here' );/define( 'DB_USER', 'wordpress' );/" /var/www/html/wp-config.php
+	sed -i "s/define( 'DB_NAME', 'database_name_here' );/define( 'DB_NAME', '$db_wp_name' );/" /var/www/html/wp-config.php
+	sed -i "s/define( 'DB_USER', 'username_here' );/define( 'DB_USER', '$db_wp_user' );/" /var/www/html/wp-config.php
 	sed -i "s/define( 'DB_PASSWORD', 'password_here' );/define( 'DB_PASSWORD', '$db_wp_pass' );/" /var/www/html/wp-config.php
 
 # configuracion permisos para apache
 	chown -R www-data /var/www/html/
-#	chcon -t apache2_sys_rw_content_t /var/www/html/ -R
-#	restorecon -Rv /var/www/html/
 	chmod -Rf 755 /var/www/html/
-#	semanage fcontext -a -t apache2_sys_rw_content_t "/var/www/html(/.*)?"
 	systemctl restart apache2

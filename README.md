@@ -1,5 +1,5 @@
 # Autoweb_pub
-Auto deploy LAMP + Wordpress 
+Ubuntu server 22.04 LTS tested*
                 
 1. Crear usuario sudo USER_NAME y su configuracion.
 2. Actualizar paquetes
